@@ -1,0 +1,231 @@
+import java.util.Stack;
+
+
+
+public class BTreeOrder {
+
+  public static void main(String[] args) throws Exception {
+
+    //initiate BT tree
+	  BT bt = BT.createBT();
+      
+	  //initiate  Tree_1
+	  BT bt1 = BT.createBT_1();
+	  
+	//initiate  Tree_2
+	  BT bt2 = BT.createBT_2();
+
+    System.out.println("recursive method:");
+
+    bt.inOrder();
+
+    System.out.println();
+    
+    
+    System.out.println("without Recursion Implementation method:");
+    
+    bt.inOrderIteration();
+    System.out.println();
+    System.out.println("***************End First Question**************");
+
+    
+    
+    System.out.println();
+    System.out.println("Second Question");
+    
+    System.out.println("Postorder Tree1:");
+    bt.printPostorder(bt1.root);
+    
+    System.out.println();
+    System.out.println(" Inorder Tree1:  ");
+    bt.printInorder(bt1.root);
+    
+    System.out.println();   
+    System.out.println("Preorder Tree1:  ");
+    bt.printPreorder(bt1.root);
+    
+    
+    System.out.println(); 
+    
+    System.out.println("Postorder Tree2:");
+    bt.printPostorder(bt2.root);
+    
+    System.out.println();
+    System.out.println("Inorder Tree2:  ");
+    bt.printInorder(bt2.root);
+    
+    System.out.println();
+    System.out.println("Preorder Tree2:  ");
+    bt.printPreorder(bt2.root);
+  }
+
+}
+//  BTree Class
+class BT {
+  static class TreeNode {
+    String data;
+    TreeNode left, right;
+
+    TreeNode(String value) {
+      this.data = value;
+      left = right = null;
+    }
+
+    boolean isLeaf() {
+      return left == null ? right == null : false;
+    }
+
+  }
+
+  // root of BT
+  TreeNode root;
+
+  
+  public void inOrder() {
+    inOrder(root);
+  }
+// first method by recursive we will get the inorder traversal sequence
+  private void inOrder(TreeNode node) {
+    if (node == null) {
+      return;
+    }
+
+    inOrder(node.left);
+    System.out.printf("%s ", node.data);
+    inOrder(node.right);
+  }
+  
+  
+// function depends on iteration to get the inorder traversal sequence
+  
+  public void inOrderIteration() {
+    Stack nodes = new Stack<>();
+    TreeNode current = root;
+
+    while (!nodes.isEmpty() || current != null) {
+
+      if (current != null) {
+        nodes.push(current);
+        current = current.left;
+      } else {
+        TreeNode node = (TreeNode) nodes.pop();
+        System.out.printf("%s ", node.data);
+        current = node.right;
+      }
+
+    }
+  }
+
+ // create BT Tree
+  public static BT createBT() {
+	  BT tree = new BT();
+    TreeNode root = new TreeNode("7");
+    tree.root = root;
+    tree.root.left = new TreeNode("5");
+    tree.root.left.left = new TreeNode("3");
+    tree.root.left.left.left = new TreeNode("1");
+    tree.root.left.left.left.left = new TreeNode("0");
+
+    tree.root.left.left.left.right = new TreeNode("2");
+    tree.root.left.left .right=new TreeNode("4");
+    tree.root.left.right=new TreeNode("6");
+    tree.root.right=new TreeNode("8");
+     tree.root.right.right = new TreeNode("9");
+   
+
+    return tree;
+  }
+//create BT Tree_1
+ public static BT createBT_1() {
+	  BT tree = new BT();
+   TreeNode root = new TreeNode("A");
+   tree.root = root;
+   tree.root.left = new TreeNode("B");
+                
+                                      tree.root.right = new TreeNode("C");
+   
+   tree.root.left.right = new TreeNode("D");
+   tree.root.left.right.left = new TreeNode("E");
+    
+                                      tree.root.left.right.right = new TreeNode("F");
+
+   tree.root.left.right.left.left = new TreeNode("G");
+   tree.root.left.right.left.right = new TreeNode("H");
+   tree.root.left.right.left.right.right = new TreeNode("I");
+   tree.root.left.right.left.right.right.right = new TreeNode("J");
+
+   return tree;
+ }
+//create BT Tree_2
+public static BT createBT_2() {
+	  BT tree = new BT();
+  TreeNode root = new TreeNode("G");
+  tree.root = root;
+  tree.root.right = new TreeNode("F");
+               
+  
+  tree.root.right.left = new TreeNode("E");
+  tree.root.right.right = new TreeNode("C");
+
+  tree.root.right.left.left = new TreeNode("I");
+  tree.root.right.left.left.left = new TreeNode("j");
+  tree.root.right.left.left.right = new TreeNode("H");
+
+  tree.root.right.right.left = new TreeNode("D");
+  tree.root.right.right.right = new TreeNode("A");
+
+  tree.root.right.right.left.left = new TreeNode("B");
+
+  return tree;
+}
+  public void printPostorder(TreeNode node)
+  {
+      if (node == null)
+          return;
+
+      // first recur on left subtree
+      printPostorder(node.left);
+
+      // then recur on right subtree
+      printPostorder(node.right);
+
+      // now deal with the node
+      System.out.print(node.data + " ");
+  }
+
+  /* Given a binary tree, print its nodes in inorder*/
+  public  void printInorder(TreeNode node)
+  {
+      if (node == null)
+          return;
+
+      /* first recur on left child */
+      printInorder(node.left);
+
+      /* then print the data of node */
+      System.out.print(node.data + " ");
+
+      /* now recur on right child */
+      printInorder(node.right);
+  }
+
+  /* Given a binary tree, print its nodes in preorder*/
+  public  void printPreorder(TreeNode node)
+  {
+      if (node == null)
+          return;
+
+      /* first print data of node */
+      System.out.print(node.data + " ");
+
+      /* then recur on left sutree */
+      printPreorder(node.left);
+
+      /* now recur on right subtree */
+      printPreorder(node.right);
+  }
+
+
+  
+  
+}

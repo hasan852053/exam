@@ -1,0 +1,787 @@
+package com.webservice;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.servlet.ServletContext;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.*;
+import com.model.SalesInfo;
+import com.model.product;
+
+@Path("getreportService")
+public class ReportApi {
+
+	// Constructonmr
+	public ReportApi(@Context ServletContext servletContext) {
+
+		// user = new VTSUser();
+
+	}
+
+
+
+	@Path("/getAcualSalesAverageGrouthAchievement")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getAcualSalesAverageGrouthAchievement(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) {
+	
+		    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	
+		ObjectMapper mapper = new ObjectMapper();
+	    List<SalesInfo>	SalesInfoListThisYear=	SalesInfo.getAcualSalesAverageGrouthAchievement(from, to)	;
+	    Date choosenFromYearDate =from;
+	    Date choosenToYearDate =to;
+		 choosenFromYearDate.setYear(from.getYear()-1);
+		 choosenToYearDate.setYear(to.getYear()-1);
+		 List<SalesInfo>	SalesInfoListLastYear=	SalesInfo.getAcualSalesAverageGrouthAchievement(choosenFromYearDate, choosenToYearDate)	;
+
+		 
+		 JsonArray jsonarrayCars;
+
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+		for (SalesInfo  lp : SalesInfoListThisYear) {
+		
+			builder.add(Json
+					.createObjectBuilder()
+					.add("AVG_QUANTITY", lp.getAvgQuantity())
+					.add("AVG_AMOUNT", lp.getAvgAmount())
+					.add("QUANTITY", lp.getSumQuantity())
+					.add("AMOUNT", lp.getSumAmount())
+					.add("GROUTH1", lp.getAvgQuantity()-SalesInfoListLastYear.get(0).getAvgQuantity())
+					.add("GROUTH2", lp.getAvgAmount()-SalesInfoListLastYear.get(0).getAvgAmount())
+
+					   );
+		}
+		jsonarrayCars = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarrayCars)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	@Path("/getTotalSalesPerFactory")
+	@GET
+//	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getTotalSalesPerFactory(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) throws JsonProcessingException {
+	
+		    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	
+		ObjectMapper mapper = new ObjectMapper();
+	    List<SalesInfo>	SalesInfoList=	SalesInfo.totalSalesPerFactory(from, to)	;
+		JsonArray jsonarrayCars;
+
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+		for (SalesInfo  lp : SalesInfoList) {
+		
+			builder.add(Json
+					.createObjectBuilder()
+					.add("AVG", lp.getAvgPrice())
+					.add("AMOUNT", lp.getSumAmount())
+					.add("QUANTITY", lp.getSumQuantity())
+					.add("FACTORY",lp.getFactory())
+				
+					   );
+		}
+		jsonarrayCars = builder.build();
+      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+		return Response.ok(jsonarrayCars.toString()).build();
+
+	}
+	@Path("/getTotalSalesPerPeoduct")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getTotalSalesPerPeoduct(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) {
+	
+		 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		ObjectMapper mapper = new ObjectMapper();
+		
+     	List<SalesInfo> SalesInfoList =SalesInfo.getTotalSalesPerProduct(from, to);
+     	JsonArray jsonarraySales;
+
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+		for (SalesInfo  lp : SalesInfoList) {
+		
+			builder.add(Json
+					.createObjectBuilder()
+					.add("AMOUNT", lp.getSumAmount())
+					.add("QUANTITY", lp.getSumQuantity())
+					.add("PRODUCT_NAME", lp.getProductName())
+					.add("PRODUCT_NUMBER", lp.getProductNo())
+				
+					   );
+		}
+		jsonarraySales = builder.build();
+     	
+	      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+			return Response.ok(jsonarraySales.toString()).build();
+	}
+	@Path("/getTotalsalesOfProduct")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getTotalsalesOfProduct(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate,String producid) {
+	
+		 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		ObjectMapper mapper = new ObjectMapper();
+		
+     	List<SalesInfo> SalesInfoList =SalesInfo.getTotalsalesOfProduct(from, to,producid);
+     	List<SalesInfo> SalesInfoListTotal =SalesInfo.ymamaTotaleSale(from, to);
+
+     	JsonArray jsonarraySales;
+
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+		for (SalesInfo  lp : SalesInfoList) {
+		
+			builder.add(Json
+					.createObjectBuilder()
+					.add("PECENTAGE_AMOUNT", (lp.getSumAmount()/SalesInfoListTotal.get(0).getYmamaSumAmount())*100)
+					.add("PERCENTAGE_QUANTITY", (lp.getSumQuantity()/SalesInfoListTotal.get(0).getYmamaSumQuantity())*100)
+					
+				
+					   );
+		}
+		jsonarraySales = builder.build();
+     	
+     	
+		jsonarraySales = builder.build();
+	      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+			return Response.ok(jsonarraySales.toString()).build();
+	}
+	@Path("/getPriceAverage")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getPriceAverage(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) {
+	
+		   ObjectMapper mapper = new ObjectMapper();	
+		   SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		     
+	      List<SalesInfo> SalesInfoList =SalesInfo.getAveragePrice(from, to);
+	     	JsonArray jsonarraySales;
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("avgprice", lp.getAvgPrice())
+						   );
+			}
+			jsonarraySales = builder.build();
+		
+		      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+				return Response.ok(jsonarraySales.toString()).build();
+	}
+	@Path("/getMarketShare")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getMarketShare(@Context ServletContext servletContext, @QueryParam("fromDate") Date fromDate,
+			@QueryParam("toDate") Date toDate) {
+	
+		    ObjectMapper mapper = new ObjectMapper();      
+	        List<SalesInfo> SalesInfoList =SalesInfo.getMarketShare(fromDate, toDate);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("AMOUNT", lp.getSumAmount())
+						.add("QUANTITY", lp.getSumQuantity())		
+					
+						   );
+			}
+			jsonarraySales = builder.build();
+	     	
+			jsonarraySales = builder.build();
+		      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+				return Response.ok(jsonarraySales.toString()).build();
+	}
+	@Path("/getMonthlySales")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getMonthlySales(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) {
+		   ObjectMapper mapper = new ObjectMapper();
+		   SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	      List<SalesInfo> SalesInfoList =SalesInfo.getMonthlySales(from, to);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("AVG_QUANTITY", lp.getAvgQuantity())
+						.add("AVG_AMOUNT",lp.getAvgAmount())
+						.add("AMOUNT", lp.getSumAmount())
+						.add("QUANTITY", lp.getSumQuantity())		
+					
+						   );
+			}
+			jsonarraySales = builder.build();
+	     	
+			jsonarraySales = builder.build();
+		      // String ss=mapper.writeValueAsString(jsonarrayCars).toString();
+		return Response.ok(jsonarraySales.toString()).build();
+	}
+	@Path("/getKpi")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getKpi(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate) {
+	
+		ObjectMapper mapper = new ObjectMapper();
+		 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		    Date from=null;
+		    Date to=null;
+		     try {
+				 from = sdf.parse(fromDate);
+				 to = sdf.parse(toDate);
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	      List<SalesInfo> SalesInfoList =SalesInfo.getKpi(from, to);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("CITY", lp.getCity())
+						.add("ACTIVITY",lp.getActivity())
+						.add("AMOUNT", lp.getSumAmount())
+						.add("QUANTITY", lp.getSumQuantity())		
+					
+						   );
+			}
+			jsonarraySales = builder.build();
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Path("/getByCustomerAndProduct")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getByCustomerAndProduct(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate,@QueryParam("customerNo")String customerNo,@QueryParam("productNo") String productNo /* productNo may 'total'*/) {
+	
+	        	ObjectMapper mapper = new ObjectMapper();
+	    	     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			    Date to=null;
+			     try {
+					 from = sdf.parse(fromDate);
+					 to = sdf.parse(toDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.getByCustomerAndProduct(from, to,customerNo,productNo);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("CUSTOMER_NAME", lp.getCustomerName())
+						.add("CUSTOMER_NUMBER",lp.getCustomerNo())
+						.add("PRODUCT_NAME", lp.getProductName())
+						.add("PRODUCT_NUMBER", lp.getProductNo())
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("DELIVERY_NOTE_DATE", lp.getDelivaryNoteDate().toString())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Path("/getYmamaSales")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getYmamaSales(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+		
+	    	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			    Date to=null;
+			     try {
+					 from = sdf.parse(fromDate);
+					 to = sdf.parse(toDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.ymamaTotaleSale(from, to);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()						
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("AMOUNT", lp.getSumAmount())		
+					
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Path("/getSalesValues")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getSalesValues(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate,
+			@QueryParam("toDate") String toDate,@QueryParam("customerNo")String customerNo,@QueryParam("productNo") String productNo)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+	       	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			    Date to=null;
+			     try {
+					 from = sdf.parse(fromDate);
+					 to = sdf.parse(toDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.getSalesValues(from, to, customerNo, productNo);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("AVG_QUANTITY", lp.getAvgQuantity())		
+						.add("AVG_AMOUNT", lp.getAvgAmount())		
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("DELIVERY_NOTE_DATE", lp.getDelivaryNoteDate().toString())		
+						.add("PERCENTAGE_AMOUNT_TO_YAMAMA", lp.getPercentageToYmamaSalesAmount())		
+						.add("PERCENTAGE_QUANTITY_TO_YAMAMA", lp.getPercentageToYmamaSalesQuantity())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@Path("/getTotalSalesForAllCustomersInDay")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getTotalSalesForAllCustomersInDay(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+	       	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			     try {
+					 from = sdf.parse(fromDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.getTotalSalesForAllCustomersInDay(from);
+	     	JsonArray jsonarraySales;
+
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("DELIVERY_NOTE_DATE", lp.getDelivaryNoteDate().toString())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	@Path("/getAcualSalesForEachCustomersFromAllproductInDayWithFactory")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getAcualSalesForEachCustomersFromAllproductInDay(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+	       	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			     try {
+					 from = sdf.parse(fromDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.getAcualSalesForEachCustomersFromAllproductInDayWithFactory(from);
+	     	JsonArray jsonarraySales;
+	
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("CUSTOMER_NUMBER", lp.getCustomerNo())		
+						.add("CUSTOMER_NAME", lp.getCustomerName())		
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("DELIVERY_NOTE_DATE", lp.getDelivaryNoteDate().toString())		
+						.add("FACTORY", lp.getFactory())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	@Path("/getSalesForEachCustomersForEachProductInDayWithFactory")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getSalesForEachCustomersForEachProductInDayWithFactory(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+	       	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			     try {
+					 from = sdf.parse(fromDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.getSalesForEachCustomersForEachProductInDayWithFactory(from);
+	     	JsonArray jsonarraySales;
+	
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+						.add("CUSTOMER_NUMBER", lp.getCustomerNo())		
+						.add("CUSTOMER_NAME", lp.getCustomerName())	
+						.add("PRODUCT_NAME", lp.getProductName())
+						.add("PRODUCT_NUMBER", lp.getProductNo())		
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("QUANTITY", lp.getSumQuantity())		
+						.add("DELIVERY_NOTE_DATE", lp.getDelivaryNoteDate().toString())		
+						.add("FACTORY", lp.getFactory())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	@Path("/geSalesByArea")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response geSalesByArea(@Context ServletContext servletContext, @QueryParam("fromDate") String fromDate, @QueryParam("fromDate") String toDate,String area)
+	{
+	    	ObjectMapper mapper = new ObjectMapper();
+	       	 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			    Date from=null;
+			    Date to=null;
+			     try {
+					 from = sdf.parse(fromDate);
+					 to = sdf.parse(toDate);
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	        List<SalesInfo> SalesInfoList =SalesInfo.geSalesByArea(from,to,area);
+	     	JsonArray jsonarraySales;
+	
+			JsonArrayBuilder builder = Json.createArrayBuilder();		
+			for (SalesInfo  lp : SalesInfoList) {
+			
+				builder.add(Json
+						.createObjectBuilder()
+							
+						.add("AMOUNT", lp.getSumAmount())		
+						.add("QUANTITY", lp.getSumQuantity())		
+
+						   );
+			}
+			jsonarraySales = builder.build();
+
+		try {
+			return Response.ok(mapper.writeValueAsString(jsonarraySales)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	/*@Path("/getByCustomerAndProductAndCompaireYear")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getByCustomerAndProductAndCompaireYear(@Context ServletContext servletContext, @QueryParam("fromDate") Date fromDate,
+			@QueryParam("toDate") Date toDate,@QueryParam("customerNo")String customerNo,@QueryParam("productNo") String productNo  productNo may 'total',Integer year) {
+	
+		ObjectMapper mapper = new ObjectMapper();
+		Gson gson = new Gson();
+		
+	      String json = gson.toJson(SalesInfo.getByCustomerAndProductAndYearCompaire(fromDate, toDate,customerNo,productNo,year)); // converts to json
+
+		try {
+			return Response.ok(mapper.writeValueAsString(json)).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}*/
+	/*@Path("/getReportTest")
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getReportTest() {
+	
+		ObjectMapper mapper = new ObjectMapper();
+		
+		try {
+			return Response.ok(mapper.writeValueAsString(JSONArray.toJSONString(list))).build();
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}*/
+	
+	/*public JsonArray toJsonPerFactory(List<SalesInfo> SalesInfoList) {
+
+	   	
+		JsonArray jsonarrayCars;
+
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+	
+		for (SalesInfo  lp : SalesInfoList) {
+		
+			builder.add(Json
+					.createObjectBuilder()
+					.add("AVG", lp.getAvgPrice())
+					.add("AMOUNT", lp.getSumAmount())
+					.add("QUANTITY", lp.getQuantity())
+					.add("FACTORY", lp.getFactory())
+				
+					   );
+		}
+		jsonarrayCars = builder.build();
+		// System.out.println(pathPointList);
+		return jsonarrayCars;
+	}*/
+}

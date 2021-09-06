@@ -1,0 +1,1271 @@
+package com.model;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.webservice.*;
+
+public  class SalesInfo {
+	
+	 private Double avgPrice;
+	 private Double sumQuantity;
+	 private Double  sumAmount;
+	 private String factory;
+	 private Double avgQuantity;
+	 private Double avgAmount;
+     private String city;
+     private String activity;
+     private String productNo;
+     private String productName;
+     private String customerNo;
+     private String customerName;
+     private Double amt;
+     private Double quantity;
+     private Double ymamaSumQuantity;
+     private Double ymamaSumAmount;
+     private Date   delivaryNoteDate; 
+     private Double percentageToYmamaSalesQuantity;
+     private Double percentageToYmamaSalesAmount;
+
+	public String getFactory() {
+		return factory;
+	}
+	public void setFactory(String factory) {
+		this.factory = factory;
+	}
+	public Double getAvgPrice() {
+		return avgPrice;
+	}
+	public void setAvgPrice(Double avgPrice) {
+		this.avgPrice = avgPrice;
+	}
+	public Double getSumQuantity() {
+		return sumQuantity;
+	}
+	public void setSumQuantity(Double sumQuantity) {
+		this.sumQuantity = sumQuantity;
+	}
+	public Double getSumAmount() {
+		return sumAmount;
+	}
+	public void setSumAmount(Double sumAmount) {
+		this.sumAmount = sumAmount;
+	}
+	 
+	 
+	 public Double getAvgQuantity() {
+		return avgQuantity;
+	}
+	public void setAvgQuantity(Double avgQuantity) {
+		this.avgQuantity = avgQuantity;
+	}
+	public Double getAvgAmount() {
+		return avgAmount;
+	}
+	public void setAvgAmount(Double avgAmount) {
+		this.avgAmount = avgAmount;
+	}
+	
+	
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getActivity() {
+		return activity;
+	}
+	public void setActivity(String activity) {
+		this.activity = activity;
+	}
+	
+	
+	public String getProductNo() {
+		return productNo;
+	}
+	public void setProductNo(String productNo) {
+		this.productNo = productNo;
+	}
+	public String getProductName() {
+		return productName;
+	}
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+	public String getCustomerNo() {
+		return customerNo;
+	}
+	public void setCustomerNo(String customerNo) {
+		this.customerNo = customerNo;
+	}
+	public String getCustomerName() {
+		return customerName;
+	}
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+	
+	public Double getAmt() {
+		return amt;
+	}
+	public void setAmt(Double amt) {
+		this.amt = amt;
+	}
+	public Double getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Double quantity) {
+		this.quantity = quantity;
+	}
+	
+	public Double getYmamaSumQuantity() {
+		return ymamaSumQuantity;
+	}
+	public void setYmamaSumQuantity(Double ymamaSumQuantity) {
+		this.ymamaSumQuantity = ymamaSumQuantity;
+	}
+	public Double getYmamaSumAmount() {
+		return ymamaSumAmount;
+	}
+	public void setYmamaSumAmount(Double ymamaSumAmount) {
+		this.ymamaSumAmount = ymamaSumAmount;
+	}
+		
+	public Date getDelivaryNoteDate() {
+		return delivaryNoteDate;
+	}
+	public void setDelivaryNoteDate(Date delivaryNoteDate) {
+		this.delivaryNoteDate = delivaryNoteDate;
+	}
+	
+	
+	public Double getPercentageToYmamaSales() {
+		return percentageToYmamaSalesQuantity;
+	}
+	public void setPercentageToYmamaSales(Double percentageToYmamaSales) {
+		this.percentageToYmamaSalesQuantity = percentageToYmamaSales;
+	}
+	
+	public Double getPercentageToYmamaSalesQuantity() {
+		return percentageToYmamaSalesQuantity;
+	}
+	public void setPercentageToYmamaSalesQuantity(Double percentageToYmamaSalesQuantity) {
+		this.percentageToYmamaSalesQuantity = percentageToYmamaSalesQuantity;
+	}
+	public Double getPercentageToYmamaSalesAmount() {
+		return percentageToYmamaSalesAmount;
+	}
+	public void setPercentageToYmamaSalesAmount(Double percentageToYmamaSalesAmount) {
+		this.percentageToYmamaSalesAmount = percentageToYmamaSalesAmount;
+	}
+	
+	 public static  List<SalesInfo>getAcualSalesAverageGrouthAchievement(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT  AVG (QUANTITY) AVG_QUANTITY , AVG (AMT) AVG_AMOUNT , SUM (QUANTITY) QUANTITY, SUM (AMT)  AMOUNT FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ? ";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setAvgQuantity(rs.getDouble("AVG_QUANTITY"));
+	            	 salesInfo.setAvgAmount(rs.getDouble("AVG_AMOUNT"));
+	                 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+	            	 
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				} catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static  List<SalesInfo>totalSalesPerFactory(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT Factory, AVG (UNIT_PRICE)  AVG_PRICE , SUM (QUANTITY)   QUANTITY, SUM (AMT)  AMOUNT FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ? GROUP BY Factory";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setAvgPrice(rs.getDouble("AVG_PRICE"));
+	            	salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+	             	salesInfo.setFactory(rs.getString("Factory"));
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static  List<SalesInfo>getTotalsalesOfProduct (Date from,Date to,String productNumber)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT SUM (QUANTITY)   QUANTITY, SUM (AMT)  AMOUNT FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ? AND PRODUCT_NUMBER=?";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+	             statement.setString(3,productNumber);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				} catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static List<SalesInfo> getTotalSalesPerProduct(Date from,Date to)
+	 {
+		 
+       List<SalesInfo> privateList= new ArrayList<SalesInfo>();
+		 
+		   OracleCon conn =new OracleCon();
+		   Connection myconnect=null;
+		    PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{
+				  myconnect=  conn.getConnection();
+
+			
+				 
+		         String query ="SELECT PRODUCT_NUMBER, PRODUCT_NAME , SUM (QUANTITY)     QUANTITY , SUM (AMT)  AMOUNT FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ? GROUP BY PRODUCT_NUMBER, PRODUCT_NAME";
+
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+	             	salesInfo.setProductName(rs.getString("PRODUCT_NAME"));
+	             	salesInfo.setProductNo(rs.getString("PRODUCT_NUMBER"));
+
+	             	privateList.add(salesInfo);
+	             }
+	      
+	            
+				} catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return privateList;
+		 
+	 }
+	 public static  List<SalesInfo>getAveragePrice(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT ROUND (AVG (UNIT_PRICE), 2)  AVG_PRICE FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ?";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setAvgPrice(rs.getDouble("AVG_PRICE"));
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+	 public static  List<SalesInfo>getMarketShare(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT  SUM (QUANTITY) QUANTITY , SUM (AMT) AMOUNT FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >= ? AND DELIVERY_NOTE_DATE <= ? ";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+	 public static  List<SalesInfo>getMonthlySales(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="  SELECT AVG (QUANTITY)  AVG_QUANTITY,AVG (AMT)  AVG_ AMOUNT,SUM (QUANTITY)  QUANTITY, SUM (AMT)   AMOUNT FROM YCC_PNC_SALES_DETAILS  WHERE DELIVERY_NOTE_DATE >=?  AND DELIVERY_NOTE_DATE <=?  ";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setAvgQuantity(rs.getDouble("AVG_QUANTITY"));
+	            	 salesInfo.setAvgAmount(rs.getDouble("QUANTITY"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+	 public static  List<SalesInfo>getKpi(Date from,Date to)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT CITY, ACTIVITY ,SUM (QUANTITY) QUANTITY, SUM (AMT) AMOUNT FROM YCC_PNC_SALES_DETAILS   WHERE DELIVERY_NOTE_DATE >= ?  AND DELIVERY_NOTE_DATE <= ? GROUP BY CITY , ACTIVITY";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setCity(rs.getString("CITY"));
+	            	 salesInfo.setActivity(rs.getString("ACTIVITY"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+	 public static  List<SalesInfo>getByCustomerAndProduct(Date from,Date to,String customerNo,String productNo)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+				    String query ="";
+			      if(productNo!="total")
+		          query =" SELECT CUSTOMER_NUMBER , CUSTOMER_NAME , PRODUCT_NUMBER, PRODUCT_NAME, SUM (QUANTITY)  QUANTITY, SUM (AMT) AMOUNT , DELIVERY_NOTE_DATE  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >=? AND DELIVERY_NOTE_DATE <= ? AND CUSTOMER_NUMBER=? AND PRODUCT_NUMBER=? GROUP BY CUSTOMER_NUMBER , CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME";
+			      else
+			       query =" SELECT CUSTOMER_NUMBER , CUSTOMER_NAME , PRODUCT_NUMBER, PRODUCT_NAME, SUM (QUANTITY)  QUANTITY, SUM (AMT) AMOUNT, DELIVERY_NOTE_DATE  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >=? AND DELIVERY_NOTE_DATE <= ? AND CUSTOMER_NUMBER=?  GROUP BY CUSTOMER_NUMBER , CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME";
+  
+			      
+			      statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+	             statement.setString(3,customerNo);
+	             if(productNo!="total")
+	             {
+		             statement.setString(4,productNo);
+
+	             }
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setCustomerName(rs.getString("CUSTOMER_NAME"));
+	            	 salesInfo.setCustomerNo(rs.getString("CUSTOMER_NUMBER"));
+	            	 salesInfo.setProductName(rs.getString("PRODUCT_NAME"));
+	            	 salesInfo.setProductNo(rs.getString("PRODUCT_NUMBER"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+                     salesInfo.setDelivaryNoteDate(rs.getDate("DELIVERY_NOTE_DATE"));
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+	 public static  Map <String,List<SalesInfo>> getByCustomerAndProductAndYearCompaire(Date from,Date to,String customerNo,String productNo,Integer year)
+	 {
+		 List<SalesInfo> salesInfoListForChoosenYear= new ArrayList<SalesInfo>();
+		 
+		 List<SalesInfo> forThisYear=  getByCustomerAndProduct(from,to,customerNo,productNo);
+		 Date choosenFromYearDate =from;
+		 choosenFromYearDate.setYear(year);
+		 Date choosenToearDate =to;
+          to.setYear(year);
+          salesInfoListForChoosenYear=getByCustomerAndProduct(choosenFromYearDate,choosenToearDate,customerNo,productNo);
+          Map <String,List<SalesInfo>> slsInfoMap= new HashMap<String, List<SalesInfo>>();
+          
+          slsInfoMap.put("Now", forThisYear);
+          slsInfoMap.put("anotherYear", salesInfoListForChoosenYear);
+
+          
+		 return slsInfoMap;
+		 
+	 }
+	 
+	 public  static List<SalesInfo>  ymamaTotaleSale(Date from,Date to)
+	 {
+          List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+
+		         String query ="SELECT SUM (QUANTITY) QUANTITY, SUM (AMT) AMOUNT FROM YCC_PNC_SALES_DETAILS   WHERE DELIVERY_NOTE_DATE >= ?  AND DELIVERY_NOTE_DATE <= ? ";
+				 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setYmamaSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setYmamaSumQuantity(rs.getDouble("QUANTITY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch (SQLException e) {
+			         System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			     } catch (Exception e) {
+			         e.printStackTrace();
+			     }
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+	 }
+	 public static  List<SalesInfo>getSalesValues(Date from,Date to,String customerNo,String productNo)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+				    String query ="";
+			      if(productNo!="total")
+		          query =" SELECT  AVG (QUANTITY)  AVG_QUANTITY, AVG(AMT) AVG_AMOUNT,SUM (QUANTITY)  QUANTITY,SUM (AMT) AMOUNT , DELIVERY_NOTE_DATE  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >=? AND DELIVERY_NOTE_DATE <= ? AND CUSTOMER_NUMBER=? AND PRODUCT_NUMBER=? GROUP BY CUSTOMER_NUMBER , CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME";
+			      else
+			       query =" SELECT AVG (QUANTITY)  AVG_QUANTITY, AVG(AMT) AVG_AMOUNT,SUM (QUANTITY)  QUANTITY,SUM (AMT) AMOUNT, DELIVERY_NOTE_DATE  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE >=? AND DELIVERY_NOTE_DATE <= ? AND CUSTOMER_NUMBER=?  GROUP BY CUSTOMER_NUMBER , CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME";
+  
+			      
+			      statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+	             statement.setString(3,customerNo);
+	             if(productNo!="total")
+	             {
+		             statement.setString(4,productNo);
+
+	             }
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setAvgQuantity(rs.getDouble("AVG_QUANTITY"));
+	            	 salesInfo.setAvgAmount(rs.getDouble("AVG_AMOUNT"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+                     salesInfo.setDelivaryNoteDate(rs.getDate("DELIVERY_NOTE_DATE"));
+                     SalesInfo si=   ymamaTotaleSale(from,to).get(0);
+                     salesInfo.setPercentageToYmamaSalesQuantity((salesInfo.getSumQuantity()/si.getYmamaSumQuantity())*100);
+                     salesInfo.setPercentageToYmamaSalesAmount((salesInfo.getSumAmount()/si.getYmamaSumAmount())*100);
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static  List<SalesInfo>getTotalSalesForAllCustomersInDay(Date from)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+		     
+	      
+			try{	
+				  myconnect=  conn.getConnection();
+				    
+			  String     query =" SELECT SUM (QUANTITY)  QUANTITY,SUM (AMT) AMOUNT, DELIVERY_NOTE_DATE  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE =? ";
+  
+			      
+			      statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+                     salesInfo.setDelivaryNoteDate(rs.getDate("DELIVERY_NOTE_DATE"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static  List<SalesInfo>getAcualSalesForEachCustomersFromAllproductInDayWithFactory(Date from)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+		     
+	      
+			try{	
+				  myconnect=  conn.getConnection();
+				    
+			  String     query =" SELECT CUSTOMER_NUMBER,CUSTOMER_NAME,SUM (QUANTITY)  QUANTITY,SUM (AMT) AMOUNT, DELIVERY_NOTE_DATE,FACTORY  FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE =? GROUP BY CUSTOMER_NUMBER,CUSTOMER_NAME,FACTORY";
+  
+			      
+			      statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setCustomerNo(rs.getString("CUSTOMER_NUMBER"));
+	            	 salesInfo.setCustomerName(rs.getString("CUSTOMER_NAME"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+                     salesInfo.setDelivaryNoteDate(rs.getDate("DELIVERY_NOTE_DATE"));
+	            	 salesInfo.setFactory(rs.getString("FACTORY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 public static  List<SalesInfo>getSalesForEachCustomersForEachProductInDayWithFactory(Date from)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+		     
+	      
+			try{	
+				  myconnect=  conn.getConnection();
+				    
+			  String     query =" SELECT CUSTOMER_NUMBER,CUSTOMER_NAME,PRODUCT_NUMBER,PRODUCT_NAME,SUM (QUANTITY)  QUANTITY,SUM (AMT) AMOUNT, DELIVERY_NOTE_DATE,FACTORY   FROM YCC_PNC_SALES_DETAILS WHERE DELIVERY_NOTE_DATE =? GROUP BY CUSTOMER_NUMBER,CUSTOMER_NAME, PRODUCT_NUMBER, PRODUCT_NAME,FACTORY";
+  
+			      
+			      statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setCustomerName(rs.getString("CUSTOMER_NAME"));
+	            	 salesInfo.setCustomerNo(rs.getString("CUSTOMER_NUMBER"));
+	            	 salesInfo.setProductName(rs.getString("PRODUCT_NAME"));
+	            	 salesInfo.setProductNo(rs.getString("PRODUCT_NUMBER"));
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+                     salesInfo.setDelivaryNoteDate(rs.getDate("DELIVERY_NOTE_DATE"));
+	            	 salesInfo.setFactory(rs.getString("FACTORY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	
+	 //MTD Sales By Area
+	 public static  List<SalesInfo>geSalesByArea(Date from,Date to,String area)
+	 {
+		 List<SalesInfo> salesInfoList= new ArrayList<SalesInfo>();
+		 
+		 OracleCon conn =new OracleCon();
+		 Connection myconnect=  null;
+		 PreparedStatement statement = null;
+	        
+	        java.sql.Date sqlfromDate=null;
+		     
+	        if(from!=null)
+	        {
+	        	sqlfromDate=new java.sql.Date(from.getTime());
+	        }
+	        
+	        java.sql.Date sqltoDate=null;
+		     
+	        if(to!=null)
+	        {
+	        	sqltoDate=new java.sql.Date(to.getTime());
+	        }
+	        
+			try{	
+				  myconnect=  conn.getConnection();
+                 String query="";
+                 if(area!="total") 
+		          query ="SELECT SUM (QUANTITY) QUANTITY, SUM (AMT) AMOUNT FROM YCC_PNC_SALES_DETAILS   WHERE DELIVERY_NOTE_DATE >= ?  AND DELIVERY_NOTE_DATE <= ? AND AREA=? ";				
+                 else
+   		          query ="SELECT SUM (QUANTITY) QUANTITY, SUM (AMT) AMOUNT FROM YCC_PNC_SALES_DETAILS   WHERE DELIVERY_NOTE_DATE >= ?  AND DELIVERY_NOTE_DATE <= ? GROUP BY CITY ";				
+
+                 statement = myconnect.prepareStatement(query);
+	             statement.setDate(1,sqlfromDate);
+	             statement.setDate(2,sqltoDate);
+	             if(area!="total") 
+	             statement.setString(3,area);
+                
+	             // Step 2.C: Executing SQL &amp; retrieve data into ResultSet
+	       
+	             
+	             ResultSet rs = statement.executeQuery();	
+	             while (rs.next()) {
+	            	 SalesInfo salesInfo= new SalesInfo();
+	            	 salesInfo.setSumAmount(rs.getDouble("AMOUNT"));
+	            	 salesInfo.setSumQuantity(rs.getDouble("QUANTITY"));
+
+	            	salesInfoList.add(salesInfo);
+	             }
+	      
+	            
+				}catch(Exception e){ 
+					System.out.println(e);
+					 
+				}
+			  finally {
+
+		             // Step 3: Closing database connection
+		             try {
+		                 if(null != myconnect) {
+
+		                     // cleanup resources, once after processing
+		                     statement.close();
+
+		                     // and then finally close connection
+		                     myconnect.close();
+		                 }
+		             }
+		             catch (SQLException sqlex) {
+		                 sqlex.printStackTrace();
+		             }
+		         }
+
+		 return salesInfoList;
+		 
+	 }
+	 
+}
